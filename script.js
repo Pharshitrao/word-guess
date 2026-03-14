@@ -1,15 +1,28 @@
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 
-// A small word list for demonstration
+// A small word list with semantic hints
 const WORDS = [
-    "APPLE", "CRANE", "TRAIN", "HOUSE", "MOUSE", 
-    "BRICK", "GHOST", "BLIMP", "CHAMP", "PLAIS",
-    "REACT", "VITES", "AURAL", "BEATS", "AUDIO"
+    { word: "APPLE", hint: "A crunchy round fruit that can be red, green, or yellow." },
+    { word: "CRANE", hint: "A tall bird with long legs, or a machine used for lifting." },
+    { word: "TRAIN", hint: "A series of connected railway carriages pulled by an engine." },
+    { word: "HOUSE", hint: "A building for human habitation, especially one that is lived in by a family." },
+    { word: "MOUSE", hint: "A small rodent with a pointed snout, or a computer peripheral." },
+    { word: "BRICK", hint: "A rectangular block of hard material used in building." },
+    { word: "GHOST", hint: "An ethereal apparition of a dead person." },
+    { word: "CHAMP", hint: "Someone who has won a competition or contest." },
+    { word: "REACT", hint: "To respond to a stimulus, or a popular UI library." },
+    { word: "AURAL", hint: "Relating to the sense of hearing." },
+    { word: "AUDIO", hint: "Sound, especially when recorded, transmitted, or reproduced." },
+    { word: "SPACE", hint: "The vast, seemingly empty region beyond Earth's atmosphere." },
+    { word: "ROBOT", hint: "A machine capable of carrying out a complex series of actions automatically." },
+    { word: "LIGHT", hint: "The natural agent that stimulates sight and makes things visible." }
 ];
 
-// Target word
-let targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+// Target word and hint
+let targetData = WORDS[Math.floor(Math.random() * WORDS.length)];
+let targetWord = targetData.word;
+let targetHint = targetData.hint;
 console.log("Target:", targetWord); // For debugging purposes
 
 let currentGuess = "";
@@ -25,6 +38,8 @@ const statAttempts = document.getElementById('stat-attempts');
 const statWord = document.getElementById('stat-word');
 const playAgainBtn = document.getElementById('play-again');
 const toastContainer = document.getElementById('toast-container');
+const hintBtn = document.getElementById('hint-btn');
+const hintText = document.getElementById('hint-text');
 
 // Map to track letter states on keyboard
 const letterStates = {};
@@ -36,8 +51,10 @@ function initGame() {
     currentRow = 0;
     gameOver = false;
     
-    // Pick new word
-    targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+    // Pick new word and hint
+    targetData = WORDS[Math.floor(Math.random() * WORDS.length)];
+    targetWord = targetData.word;
+    targetHint = targetData.hint;
     
     // Reset keyboard keys UI
     document.querySelectorAll('.key').forEach(key => {
@@ -50,6 +67,13 @@ function initGame() {
     }
     
     modalOverlay.classList.remove('visible');
+    
+    // Reset Hint
+    hintText.classList.add('hidden');
+    hintText.textContent = 'Click for a clue...';
+    hintBtn.disabled = false;
+    hintBtn.style.opacity = '1';
+    hintBtn.style.cursor = 'pointer';
     
     // Create Grid
     for (let i = 0; i < MAX_GUESSES; i++) {
@@ -242,6 +266,28 @@ keyboard.addEventListener('click', (e) => {
 });
 
 playAgainBtn.addEventListener('click', initGame);
+
+// Hint Logic
+hintBtn.addEventListener('click', () => {
+    if (gameOver) return;
+    
+    showHint(`CLUE: ${targetHint}`);
+    
+    // Disable hint after one use per game
+    hintBtn.disabled = true;
+    hintBtn.style.opacity = '0.5';
+    hintBtn.style.cursor = 'default';
+});
+
+function showHint(message) {
+    hintText.textContent = message;
+    hintText.classList.remove('hidden');
+    hintText.classList.add('reveal-animation');
+    
+    setTimeout(() => {
+        hintText.classList.remove('reveal-animation');
+    }, 300);
+}
 
 // Start game on load
 initGame();
